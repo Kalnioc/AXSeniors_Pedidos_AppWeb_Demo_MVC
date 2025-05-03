@@ -11,45 +11,44 @@ namespace AXSeniors_Pedidos_Demo_MVC.Controllers
 {
     public class PedidoController : Controller
     {
-        private readonly IConsultaBL consultaBL;
-        private readonly IInsertBL insertBL;
-        private readonly IUpdateBL updateBL;
-
-        public PedidoController()
+        private readonly IConsultaBL _consultaBL;
+        private readonly IInsertBL _insertBL;
+        private readonly IUpdateBL _updateBL;
+        public PedidoController(ConsultaBL consultaBL, InsertBL insertBL, UpdateBL updateBL)
         {
-            this.consultaBL = new ConsultaBL();
-            this.insertBL = new InsertBL();
-            this.updateBL = new UpdateBL();
+            _consultaBL = consultaBL;
+            _insertBL = insertBL;
+            _updateBL = updateBL;
         }
 
         public ActionResult Index()
         {
-            List<PedidoCabeceraBE> wPedidoCabeceraListBE = consultaBL.ConsultaPedidoCabecera();
+            List<PedidoCabeceraBE> wPedidoCabeceraListBE = _consultaBL.ConsultaPedidoCabecera();
             return View(wPedidoCabeceraListBE);
         }
 
         public ActionResult Agregar()
         {
-            ViewBag.Clientes = consultaBL.ConsultaCliente() ?? new List<ClienteBE>();
-            ViewBag.Comprobantes = consultaBL.ConsultaTipoComprobante() ?? new List<TipoComprobanteBE>();
-            ViewBag.Productos = consultaBL.ConsultaProducto() ?? new List<ProductoBE>();
+            ViewBag.Clientes = _consultaBL.ConsultaCliente() ?? new List<ClienteBE>();
+            ViewBag.Comprobantes = _consultaBL.ConsultaTipoComprobante() ?? new List<TipoComprobanteBE>();
+            ViewBag.Productos = _consultaBL.ConsultaProducto() ?? new List<ProductoBE>();
 
             return View();
         }
 
         public ActionResult Details(int id)
         {
-            PedidoCabeceraBE wPedidoCabeceraBE = consultaBL.ConsultaPedidoDetalle(id);
+            PedidoCabeceraBE wPedidoCabeceraBE = _consultaBL.ConsultaPedidoDetalle(id);
             return View(wPedidoCabeceraBE);
         }
 
         public ActionResult Edit(int id)
         {
-            var wPedido = consultaBL.ConsultaPedidoDetalle(id);
-            ViewBag.Clientes = consultaBL.ConsultaCliente();
-            ViewBag.Comprobantes = consultaBL.ConsultaTipoComprobante();
-            ViewBag.Estados = consultaBL.ConsultaEstado();
-            ViewBag.Productos = consultaBL.ConsultaProducto();
+            var wPedido = _consultaBL.ConsultaPedidoDetalle(id);
+            ViewBag.Clientes = _consultaBL.ConsultaCliente();
+            ViewBag.Comprobantes = _consultaBL.ConsultaTipoComprobante();
+            ViewBag.Estados = _consultaBL.ConsultaEstado();
+            ViewBag.Productos = _consultaBL.ConsultaProducto();
             return View("Editar", wPedido);
         }
 
@@ -102,17 +101,17 @@ namespace AXSeniors_Pedidos_Demo_MVC.Controllers
                     // Validación de stock antes de agregar nuevo producto
                     if (estado == "nuevo")
                     {
-                        var stockDisponible = consultaBL.ConsultaProducto()
+                        var stockDisponible = _consultaBL.ConsultaProducto()
                             .FirstOrDefault(p => p.ProductoId == productoId)?.Stock ?? 0;
 
                         if (cantidad > stockDisponible)
                         {
                             ModelState.AddModelError("", $"No hay suficiente stock para el producto ID {productoId}. Stock disponible: {stockDisponible}");
-                            ViewBag.Clientes = consultaBL.ConsultaCliente();
-                            ViewBag.Comprobantes = consultaBL.ConsultaTipoComprobante();
-                            ViewBag.Productos = consultaBL.ConsultaProducto();
-                            ViewBag.Estados = consultaBL.ConsultaEstado();
-                            return View("Editar", consultaBL.ConsultaPedidoDetalle(wPedidoCabeceraBE.PedidoCabeceraId));
+                            ViewBag.Clientes = _consultaBL.ConsultaCliente();
+                            ViewBag.Comprobantes = _consultaBL.ConsultaTipoComprobante();
+                            ViewBag.Productos = _consultaBL.ConsultaProducto();
+                            ViewBag.Estados = _consultaBL.ConsultaEstado();
+                            return View("Editar", _consultaBL.ConsultaPedidoDetalle(wPedidoCabeceraBE.PedidoCabeceraId));
                         }
                     }
 
@@ -140,22 +139,22 @@ namespace AXSeniors_Pedidos_Demo_MVC.Controllers
                 wPedidoCabeceraBE.Total = wPedidoCabeceraBE.Subtotal + wPedidoCabeceraBE.Impuestos;
 
                 // Actualizar cabecera con totales
-                updateBL.ActualizarPedidoCabecera(wPedidoCabeceraBE);
+                _updateBL.ActualizarPedidoCabecera(wPedidoCabeceraBE);
 
                 // Insertar nuevos
-                insertBL.InsertarPedidoDetalle(wNuevos);
+                _insertBL.InsertarPedidoDetalle(wNuevos);
                 foreach (var item in wNuevos)
-                    updateBL.ActualizarStock(item.ProductoId, item.CantidadItem, "D");
+                    _updateBL.ActualizarStock(item.ProductoId, item.CantidadItem, "D");
 
                 // Actualizar modificados
                 foreach (var item in wEditados)
-                    updateBL.ActualizarPedidoDetalle(item);
+                    _updateBL.ActualizarPedidoDetalle(item);
 
                 // Eliminar líneas y devolver stock
                 foreach (var item in wEliminados)
                 {
-                    updateBL.EliminarPedidoDetalle(item.PedidoDetalleId);
-                    updateBL.ActualizarStock(item.ProductoId, item.CantidadItem, "I");
+                    _updateBL.EliminarPedidoDetalle(item.PedidoDetalleId);
+                    _updateBL.ActualizarStock(item.ProductoId, item.CantidadItem, "I");
                 }
 
                 return RedirectToAction("Index");
@@ -163,11 +162,11 @@ namespace AXSeniors_Pedidos_Demo_MVC.Controllers
             catch (Exception ex)
             {
                 ViewBag.Error = "Error al actualizar: " + ex.Message;
-                ViewBag.Clientes = consultaBL.ConsultaCliente();
-                ViewBag.Comprobantes = consultaBL.ConsultaTipoComprobante();
-                ViewBag.Productos = consultaBL.ConsultaProducto();
-                ViewBag.Estados = consultaBL.ConsultaEstado();
-                return View("Editar", consultaBL.ConsultaPedidoDetalle(Convert.ToInt32(form["PedidoCabeceraId"])));
+                ViewBag.Clientes = _consultaBL.ConsultaCliente();
+                ViewBag.Comprobantes = _consultaBL.ConsultaTipoComprobante();
+                ViewBag.Productos = _consultaBL.ConsultaProducto();
+                ViewBag.Estados = _consultaBL.ConsultaEstado();
+                return View("Editar", _consultaBL.ConsultaPedidoDetalle(Convert.ToInt32(form["PedidoCabeceraId"])));
             }
         }
 
@@ -192,7 +191,7 @@ namespace AXSeniors_Pedidos_Demo_MVC.Controllers
 
                 decimal wSubtotal = 0;
 
-                var listaProductos = consultaBL.ConsultaProducto();
+                var listaProductos = _consultaBL.ConsultaProducto();
 
                 // Validación de stock antes de guardar
                 for (int i = 0; i < productos.Length; i++)
@@ -206,10 +205,10 @@ namespace AXSeniors_Pedidos_Demo_MVC.Controllers
                     {
                         ModelState.AddModelError("", $"Stock insuficiente para el producto ID {productoId}. Stock disponible: {stockDisponible}");
 
-                        ViewBag.Clientes = consultaBL.ConsultaCliente();
-                        ViewBag.Comprobantes = consultaBL.ConsultaTipoComprobante();
+                        ViewBag.Clientes = _consultaBL.ConsultaCliente();
+                        ViewBag.Comprobantes = _consultaBL.ConsultaTipoComprobante();
                         ViewBag.Productos = listaProductos;
-                        ViewBag.Estados = consultaBL.ConsultaEstado();
+                        ViewBag.Estados = _consultaBL.ConsultaEstado();
 
                         return View();
                     }
@@ -231,18 +230,18 @@ namespace AXSeniors_Pedidos_Demo_MVC.Controllers
                 wPedidoCabeceraBE.Impuestos = Math.Round(wSubtotal * 0.18M, 2);
                 wPedidoCabeceraBE.Total = wPedidoCabeceraBE.Subtotal + wPedidoCabeceraBE.Impuestos;
 
-                int wPedidoCabeceraId = insertBL.InsertarPedidoCabecera(wPedidoCabeceraBE);
+                int wPedidoCabeceraId = _insertBL.InsertarPedidoCabecera(wPedidoCabeceraBE);
 
                 foreach (var wDetalleBE in wPedidoDetalleListBE)
                 {
                     wDetalleBE.PedidoCabeceraId = wPedidoCabeceraId;
                 }
 
-                insertBL.InsertarPedidoDetalle(wPedidoDetalleListBE);
+                _insertBL.InsertarPedidoDetalle(wPedidoDetalleListBE);
 
                 foreach (var wDetalleBE in wPedidoDetalleListBE)
                 {
-                    updateBL.ActualizarStock(wDetalleBE.ProductoId, wDetalleBE.CantidadItem, "D");
+                    _updateBL.ActualizarStock(wDetalleBE.ProductoId, wDetalleBE.CantidadItem, "D");
                 }
 
                 return RedirectToAction("Index");
@@ -250,10 +249,10 @@ namespace AXSeniors_Pedidos_Demo_MVC.Controllers
             catch (Exception ex)
             {
                 ViewBag.Error = "Error al guardar el pedido: " + ex.Message;
-                ViewBag.Clientes = consultaBL.ConsultaCliente();
-                ViewBag.Comprobantes = consultaBL.ConsultaTipoComprobante();
-                ViewBag.Productos = consultaBL.ConsultaProducto();
-                ViewBag.Estados = consultaBL.ConsultaEstado();
+                ViewBag.Clientes = _consultaBL.ConsultaCliente();
+                ViewBag.Comprobantes = _consultaBL.ConsultaTipoComprobante();
+                ViewBag.Productos = _consultaBL.ConsultaProducto();
+                ViewBag.Estados = _consultaBL.ConsultaEstado();
                 return View();
             }
         }

@@ -11,20 +11,20 @@ namespace AXSeniors_Pedidos_Demo_MVC.Controllers
 {
     public class ClienteController : Controller
     {
-        private readonly IConsultaBL consultaBL;
-        private readonly IInsertBL insertBL;
-        private readonly IUpdateBL updateBL;
+        private readonly IConsultaBL _consultaBL;
+        private readonly IInsertBL _insertBL;
+        private readonly IUpdateBL _updateBL;
 
-        public ClienteController()
+        public ClienteController(ConsultaBL consultaBL, InsertBL insertBL, UpdateBL updateBL)
         {
-            this.consultaBL = new ConsultaBL();
-            this.insertBL = new InsertBL();
-            this.updateBL = new UpdateBL();
+            _consultaBL = consultaBL;
+            _insertBL = insertBL;
+            _updateBL = updateBL;
         }
 
         public ActionResult Index()
         {
-            return View(consultaBL.ConsultaCliente());
+            return View(_consultaBL.ConsultaCliente());
         }
 
         public ActionResult Agregar()
@@ -35,26 +35,26 @@ namespace AXSeniors_Pedidos_Demo_MVC.Controllers
         [HttpPost]
         public ActionResult Agregar(ClienteBE clienteBE)
         {
-            insertBL.InsertarCliente(clienteBE);
+            _insertBL.InsertarCliente(clienteBE);
             return RedirectToAction("Index");
         }
 
         public ActionResult Editar(int id)
         {
-            var cliente = consultaBL.ConsultaCliente().FirstOrDefault(x => x.ClienteId == id);
+            var cliente = _consultaBL.ConsultaCliente().FirstOrDefault(x => x.ClienteId == id);
             return View(cliente);
         }
 
         [HttpPost]
         public ActionResult Editar(ClienteBE p)
         {
-            updateBL.ActualizarCliente(p);
+            _updateBL.ActualizarCliente(p);
             return RedirectToAction("Index");
         }
 
         public ActionResult Eliminar(int id)
         {
-            updateBL.EliminarCliente(id);
+            _updateBL.EliminarCliente(id);
             return RedirectToAction("Index");
         }
     }

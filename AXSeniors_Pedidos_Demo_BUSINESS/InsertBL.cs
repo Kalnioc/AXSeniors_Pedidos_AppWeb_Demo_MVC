@@ -9,32 +9,34 @@ using System.Threading.Tasks;
 
 namespace AXSeniors_Pedidos_Demo_BUSINESS
 {
-    public class InsertBL: IInsertBL
+    public class InsertBL : IInsertBL
     {
-        private readonly InsertDL insertDL = new InsertDL();
+        private readonly InsertDL _insertDL = new InsertDL();
 
         public int InsertarProducto(ProductoBE pProductoBE)
         {
-            return insertDL.InsertarProducto(pProductoBE);
+            return _insertDL.InsertarProducto(pProductoBE);
         }
 
         public int InsertarPedidoCabecera(PedidoCabeceraBE pPedidoCabeceraBE)
         {
-            return insertDL.InsertarPedidoCabecera(pPedidoCabeceraBE);
+            return _insertDL.InsertarPedidoCabecera(pPedidoCabeceraBE);
         }
 
         public void InsertarPedidoDetalle(List<PedidoDetalleBE> detalles)
         {
-            insertDL.InsertarPedidoDetalle(detalles);
+            _insertDL.InsertarPedidoDetalle(detalles);
         }
 
         public int InsertarCliente(ClienteBE pClienteBE)
         {
-            return insertDL.InsertarCliente(pClienteBE);
+            return _insertDL.InsertarCliente(pClienteBE);
         }
+
         public int InsertarTipoComprobante(TipoComprobanteBE pTipoBE)
         {
-            return insertDL.InsertarTipoComprobante(pTipoBE);
+            return _insertDL.InsertarTipoComprobante(pTipoBE);
         }
     }
+
 }

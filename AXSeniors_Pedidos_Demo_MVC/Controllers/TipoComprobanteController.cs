@@ -11,20 +11,20 @@ namespace AXSeniors_Pedidos_Demo_MVC.Controllers
 {
     public class TipoComprobanteController : Controller
     {
-        private readonly IConsultaBL consultaBL;
-        private readonly IInsertBL insertBL;
-        private readonly IUpdateBL updateBL;
+        private readonly IConsultaBL _consultaBL;
+        private readonly IInsertBL _insertBL;
+        private readonly IUpdateBL _updateBL;
 
-        public TipoComprobanteController()
+        public TipoComprobanteController(ConsultaBL consultaBL, InsertBL insertBL, UpdateBL updateBL)
         {
-            this.consultaBL = new ConsultaBL();
-            this.insertBL = new InsertBL();
-            this.updateBL = new UpdateBL();
+            _consultaBL = consultaBL;
+            _insertBL = insertBL;
+            _updateBL = updateBL;
         }
 
         public ActionResult Index()
         {
-            return View(consultaBL.ConsultaTipoComprobante());
+            return View(_consultaBL.ConsultaTipoComprobante());
         }
 
         public ActionResult Agregar()
@@ -35,26 +35,26 @@ namespace AXSeniors_Pedidos_Demo_MVC.Controllers
         [HttpPost]
         public ActionResult Agregar(TipoComprobanteBE tipoComprobanteBE)
         {
-            insertBL.InsertarTipoComprobante(tipoComprobanteBE);
+            _insertBL.InsertarTipoComprobante(tipoComprobanteBE);
             return RedirectToAction("Index");
         }
 
         public ActionResult Editar(int id)
         {
-            var tipo = consultaBL.ConsultaTipoComprobante().FirstOrDefault(x => x.TipoComprobanteId == id);
+            var tipo = _consultaBL.ConsultaTipoComprobante().FirstOrDefault(x => x.TipoComprobanteId == id);
             return View(tipo);
         }
 
         [HttpPost]
         public ActionResult Editar(TipoComprobanteBE tipoComprobanteBE)
         {
-            updateBL.ActualizarTipoComprobante(tipoComprobanteBE);
+            _updateBL.ActualizarTipoComprobante(tipoComprobanteBE);
             return RedirectToAction("Index");
         }
 
         public ActionResult Eliminar(int id)
         {
-            updateBL.EliminarTipoComprobante(id);
+            _updateBL.EliminarTipoComprobante(id);
             return RedirectToAction("Index");
         }
     }

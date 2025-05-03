@@ -11,20 +11,19 @@ namespace AXSeniors_Pedidos_Demo_MVC.Controllers
 {
     public class ProductoController : Controller
     {
-        private readonly IConsultaBL consultaBL;
-        private readonly IInsertBL insertBL;
-        private readonly IUpdateBL updateBL;
+        private readonly IConsultaBL _consultaBL;
+        private readonly IInsertBL _insertBL;
+        private readonly IUpdateBL _updateBL;
 
-        public ProductoController()
+        public ProductoController(ConsultaBL consultaBL, InsertBL insertBL, UpdateBL updateBL)
         {
-            this.consultaBL = new ConsultaBL();
-            this.insertBL = new InsertBL();
-            this.updateBL = new UpdateBL();
+            _consultaBL = consultaBL;
+            _insertBL = insertBL;
+            _updateBL = updateBL;
         }
-
         public ActionResult Index()
         {
-            return View(consultaBL.ConsultaProducto());
+            return View(_consultaBL.ConsultaProducto());
         }
 
         public ActionResult Agregar()
@@ -35,26 +34,26 @@ namespace AXSeniors_Pedidos_Demo_MVC.Controllers
         [HttpPost]
         public ActionResult Agregar(ProductoBE productoBE)
         {
-            insertBL.InsertarProducto(productoBE);
+            _insertBL.InsertarProducto(productoBE);
             return RedirectToAction("Index");
         }
 
         public ActionResult Editar(int id)
         {
-            var wProducto = consultaBL.ConsultaProducto().FirstOrDefault(x => x.ProductoId == id);
+            var wProducto = _consultaBL.ConsultaProducto().FirstOrDefault(x => x.ProductoId == id);
             return View(wProducto);
         }
 
         [HttpPost]
         public ActionResult Editar(ProductoBE productoBE)
         {
-            updateBL.ActualizarProducto(productoBE);
+            _updateBL.ActualizarProducto(productoBE);
             return RedirectToAction("Index");
         }
 
         public ActionResult Eliminar(int id)
         {
-            updateBL.EliminarProducto(id);
+            _updateBL.EliminarProducto(id);
             return RedirectToAction("Index");
         }
     }

@@ -1,4 +1,5 @@
-﻿using AXSeniors_Pedidos_Demo_DATA;
+﻿using AXSeniors_Pedidos_Demo_BUSINESS.Interfaces;
+using AXSeniors_Pedidos_Demo_DATA;
 using AXSeniors_Pedidos_Demo_ENTITY;
 using System;
 using System.Collections.Generic;
@@ -8,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace AXSeniors_Pedidos_Demo_BUSINESS
 {
-    public class InsertBL
+    public class InsertBL: IInsertBL
     {
-        InsertDL insertDL = new InsertDL();
+        private readonly InsertDL insertDL = new InsertDL();
 
         public int InsertarProducto(ProductoBE pProductoBE)
         {
@@ -22,13 +23,6 @@ namespace AXSeniors_Pedidos_Demo_BUSINESS
             return insertDL.InsertarPedidoCabecera(pPedidoCabeceraBE);
         }
 
-        //public void InsertarPedidoDetalle(List<PedidoDetalleBE> pPedidoDetalleListBE)
-        //{
-        //    foreach (PedidoDetalleBE wPedidoDetalleBE in pPedidoDetalleListBE)
-        //    {
-        //        insertDL.InsertarPedidoDetalle(wPedidoDetalleBE);
-        //    }
-        //}
         public void InsertarPedidoDetalle(List<PedidoDetalleBE> detalles)
         {
             insertDL.InsertarPedidoDetalle(detalles);

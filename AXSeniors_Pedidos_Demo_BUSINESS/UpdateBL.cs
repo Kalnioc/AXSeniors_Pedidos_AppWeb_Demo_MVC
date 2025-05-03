@@ -1,4 +1,5 @@
-﻿using AXSeniors_Pedidos_Demo_DATA;
+﻿using AXSeniors_Pedidos_Demo_BUSINESS.Interfaces;
+using AXSeniors_Pedidos_Demo_DATA;
 using AXSeniors_Pedidos_Demo_ENTITY;
 using System;
 using System.Collections.Generic;
@@ -8,19 +9,15 @@ using System.Threading.Tasks;
 
 namespace AXSeniors_Pedidos_Demo_BUSINESS
 {
-    public class UpdateBL
+    public class UpdateBL: IUpdateBL
     {
-        UpdateDL updateDL = new UpdateDL();
+        private readonly UpdateDL updateDL = new UpdateDL();
 
         public int ActualizarProducto(ProductoBE pProductoBE)
         {
             return updateDL.ActualizarProducto(pProductoBE);
         }
 
-        public int EliminarProducto(int pProductoId)
-        {
-            return updateDL.EliminarProducto(pProductoId);
-        }
         public int ActualizarCliente(ClienteBE pClienteBE)
         {
             return updateDL.ActualizarCliente(pClienteBE);
@@ -30,19 +27,11 @@ namespace AXSeniors_Pedidos_Demo_BUSINESS
         {
             return updateDL.ActualizarPedidoCabecera(pPedidoBE);
         }
-        public int EliminarCliente(int pClienteId)
-        {
-            return updateDL.EliminarCliente(pClienteId);
-        }
         public int ActualizarTipoComprobante(TipoComprobanteBE pTipoBE)
         {
             return updateDL.ActualizarTipoComprobante(pTipoBE);
         }
 
-        public int EliminarTipoComprobante(int pTipoComprobanteId)
-        {
-            return updateDL.EliminarTipoComprobante(pTipoComprobanteId);
-        }
         public int ActualizarEstadoPedido(int pPedidoCabeceraId, int pEstadoId)
         {
             return updateDL.ActualizarEstadoPedido(pPedidoCabeceraId, pEstadoId);
@@ -56,10 +45,22 @@ namespace AXSeniors_Pedidos_Demo_BUSINESS
         {
             return updateDL.ActualizarPedidoDetalle(detalle);
         }
+        public int EliminarProducto(int pProductoId)
+        {
+            return updateDL.EliminarProducto(pProductoId);
+        }
+        public int EliminarCliente(int pClienteId)
+        {
+            return updateDL.EliminarCliente(pClienteId);
+        }
 
         public int EliminarPedidoDetalle(int detalleId)
         {
             return updateDL.EliminarPedidoDetalle(detalleId);
+        }
+        public int EliminarTipoComprobante(int pTipoComprobanteId)
+        {
+            return updateDL.EliminarTipoComprobante(pTipoComprobanteId);
         }
     }
 }

@@ -37,27 +37,6 @@ namespace AXSeniors_Pedidos_Demo_DATA
             }
         }
 
-        public int EliminarProducto(int pProductoId)
-        {
-            try
-            {
-                using (SqlConnection cnx = new SqlConnection(ConnectionDL.Conexion(ConnectionDL.EConexion.PruebaAXSeniorConnection)))
-                {
-                    using (SqlCommand cmd = new SqlCommand("usp_tblproducto_delete", cnx) { CommandType = CommandType.StoredProcedure })
-                    {
-                        cmd.Parameters.Add(new SqlParameter("@pProductoId", SqlDbType.Int)).Value = pProductoId;
-
-                        cnx.Open();
-                        return cmd.ExecuteNonQuery(); // Devuelve 1 si tuvo éxito
-                    }
-                }
-            }
-            catch (SqlException ex)
-            {
-                throw new Exception(ex.Message);
-            }
-        }
-
         public int ActualizarCliente(ClienteBE pClienteBE)
         {
             try
@@ -126,6 +105,27 @@ namespace AXSeniors_Pedidos_Demo_DATA
 
                         cnx.Open();
                         return cmd.ExecuteNonQuery(); // Éxito = 1
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public int EliminarProducto(int pProductoId)
+        {
+            try
+            {
+                using (SqlConnection cnx = new SqlConnection(ConnectionDL.Conexion(ConnectionDL.EConexion.PruebaAXSeniorConnection)))
+                {
+                    using (SqlCommand cmd = new SqlCommand("usp_tblproducto_delete", cnx) { CommandType = CommandType.StoredProcedure })
+                    {
+                        cmd.Parameters.Add(new SqlParameter("@pProductoId", SqlDbType.Int)).Value = pProductoId;
+
+                        cnx.Open();
+                        return cmd.ExecuteNonQuery(); // Devuelve 1 si tuvo éxito
                     }
                 }
             }

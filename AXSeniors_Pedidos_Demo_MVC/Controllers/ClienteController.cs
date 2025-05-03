@@ -1,4 +1,5 @@
 ﻿using AXSeniors_Pedidos_Demo_BUSINESS;
+using AXSeniors_Pedidos_Demo_BUSINESS.Interfaces;
 using AXSeniors_Pedidos_Demo_ENTITY;
 using System;
 using System.Collections.Generic;
@@ -10,9 +11,16 @@ namespace AXSeniors_Pedidos_Demo_MVC.Controllers
 {
     public class ClienteController : Controller
     {
-        ConsultaBL consultaBL = new ConsultaBL();
-        InsertBL insertBL = new InsertBL();
-        UpdateBL updateBL = new UpdateBL();
+        private readonly IConsultaBL consultaBL;
+        private readonly IInsertBL insertBL;
+        private readonly IUpdateBL updateBL;
+
+        public ClienteController()
+        {
+            this.consultaBL = new ConsultaBL();
+            this.insertBL = new InsertBL();
+            this.updateBL = new UpdateBL();
+        }
 
         public ActionResult Index()
         {

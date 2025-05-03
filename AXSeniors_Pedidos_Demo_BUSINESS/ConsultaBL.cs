@@ -1,4 +1,5 @@
-﻿using AXSeniors_Pedidos_Demo_DATA;
+﻿using AXSeniors_Pedidos_Demo_BUSINESS.Interfaces;
+using AXSeniors_Pedidos_Demo_DATA;
 using AXSeniors_Pedidos_Demo_ENTITY;
 using System;
 using System.Collections.Generic;
@@ -8,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace AXSeniors_Pedidos_Demo_BUSINESS
 {
-    public class ConsultaBL
+    public class ConsultaBL : IConsultaBL
     {
-        ConsultaDL consultaDL = new ConsultaDL();
+        private readonly ConsultaDL consultaDL = new ConsultaDL();
         public List<ProductoBE> ConsultaProducto()
         {          
             return consultaDL.ConsultaProducto();
@@ -35,6 +36,7 @@ namespace AXSeniors_Pedidos_Demo_BUSINESS
         {
             return consultaDL.ConsultaPedidoDetalle(pPedidoCabeceraId);
         }
+
         public List<EstadoBE> ConsultaEstado()
         {
             return consultaDL.ConsultaEstado();

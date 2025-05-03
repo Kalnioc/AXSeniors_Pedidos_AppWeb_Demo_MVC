@@ -1,0 +1,100 @@
+﻿@model AXSeniors_Pedidos_Demo_ENTITY.PedidoCabeceraBE
+@{
+    ViewBag.Title = "Agregar Pedido";
+    var productos = ViewBag.Productos as List<AXSeniors_Pedidos_Demo_ENTITY.ProductoBE>;
+    var clientes = ViewBag.Clientes as List<AXSeniors_Pedidos_Demo_ENTITY.ClienteBE>;
+    var comprobantes = ViewBag.Comprobantes as List<AXSeniors_Pedidos_Demo_ENTITY.TipoComprobanteBE>;
+}
+
+<div class="container mt-4">
+    <h2 class="mb-3">Nuevo Pedido</h2>
+    @using (Html.BeginForm("Agregar", "Pedido", FormMethod.Post))
+    {
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label>Cliente</label>
+                <select class="form-control" name="ClienteId" required>
+                    <option value="">-- Seleccione --</option>
+                    @foreach (var cliente in clientes)
+                    {
+                        <option value="@cliente.ClienteId">@cliente.Nombre @cliente.Apellido</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label>Tipo Comprobante</label>
+                <select class="form-control" name="TipoComprobanteId" required>
+                    <option value="">-- Seleccione --</option>
+                    @foreach (var comp in comprobantes)
+                    {
+                        <option value="@comp.TipoComprobanteId">@comp.Nombre</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <hr />
+        <h4>Detalle del Pedido</h4>
+        <table class="table" id="detalle-pedido">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Precio</th>
+                    <th>% Desc.</th>
+                    <th>Total</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <button type="button" class="btn btn-secondary mb-3" onclick="agregarFila()">+ Agregar Línea</button>
+
+        <div class="mb-3">
+            <input type="submit" class="btn btn-success" value="Guardar Pedido" />
+            <a href="@Url.Action("Index", "Pedido")" class="btn btn-outline-secondary">Cancelar</a>
+        </div>
+    }
+</div>
+
+<script>
+    const productos = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.Productos));
+
+    function agregarFila() {
+        const tbody = document.querySelector("#detalle-pedido tbody");
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+            <td>
+                <select name="ProductoId" class="form-control" onchange="actualizarPrecio(this)" required>
+                    ${productos.map(p => `<option value="${p.ProductoId}" data-precio="${p.Precio}">${p.Nombre}</option>`).join('')}
+                </select>
+            </td>
+            <td><input type="number" name="CantidadItem" class="form-control" min="1" value="1" required onchange="actualizarTotal(this)" /></td>
+            <td><input type="number" name="PrecioUnitario" class="form-control" step="0.01" required readonly /></td>
+            <td><input type="number" name="DescuentoItem" class="form-control" value="0" min="0" max="100" onchange="actualizarTotal(this)" /></td>
+            <td><input type="number" name="TotalItem" class="form-control" readonly /></td>
+            <td><button type="button" class="btn btn-danger" onclick="this.closest('tr').remove()">X</button></td>
+        `;
+
+        tbody.appendChild(row);
+        actualizarPrecio(row.querySelector('select'));
+    }
+
+    function actualizarPrecio(select) {
+        const precio = select.selectedOptions[0].dataset.precio;
+        const row = select.closest('tr');
+        row.querySelector('[name="PrecioUnitario"]').value = precio;
+        actualizarTotal(row.querySelector('[name="CantidadItem"]'));
+    }
+
+    function actualizarTotal(input) {
+        const row = input.closest('tr');
+        const cantidad = parseFloat(row.querySelector('[name="CantidadItem"]').value) || 0;
+        const precio = parseFloat(row.querySelector('[name="PrecioUnitario"]').value) || 0;
+        const descuento = parseFloat(row.querySelector('[name="DescuentoItem"]').value) || 0;
+
+        const total = cantidad * precio * (1 - descuento / 100);
+        row.querySelector('[name="TotalItem"]').value = total.toFixed(2);
+    }
+</script>

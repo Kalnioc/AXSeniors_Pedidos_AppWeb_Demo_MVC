@@ -1,0 +1,37 @@
+﻿@model List<AXSeniors_Pedidos_Demo_ENTITY.ProductoBE>
+
+<div class="container mt-4">
+    <h2>Productos</h2>
+    <a href="@Url.Action("Agregar")" class="btn btn-primary mb-3">+ Agregar Producto</a>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Precio</th>
+                <th>Stock</th>
+                <th>Registro</th>
+                <th>Modificación</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Nombre</td>
+                    <td>@item.Descripcion</td>
+                    @*<td>@item.Precio.ToString("C")</td>*@
+                    <td>@($"S/ {item.Precio:0.00}")</td>
+                    <td>@item.Stock</td>
+                    <td>@item.FechaRegistro.ToShortDateString()</td>
+                    <td>@item.FechaModificacion.ToShortDateString()</td>
+                    <td>
+                        @Html.ActionLink("Editar", "Editar", new { id = item.ProductoId })
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

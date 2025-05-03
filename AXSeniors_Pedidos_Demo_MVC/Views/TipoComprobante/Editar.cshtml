@@ -1,0 +1,14 @@
+﻿@model AXSeniors_Pedidos_Demo_ENTITY.TipoComprobanteBE
+
+<div class="container mt-4">
+    <h2>Editar Comprobante</h2>
+    @using (Html.BeginForm())
+    {
+        @Html.HiddenFor(m => m.TipoComprobanteId)
+        <div class="form-group">
+            <label>Nombre</label>
+            @Html.TextBoxFor(m => m.Nombre, new { @class = "form-control", required = "required" })
+        </div>
+        <button type="submit" class="btn btn-success mt-3">Actualizar</button>
+    }
+</div>

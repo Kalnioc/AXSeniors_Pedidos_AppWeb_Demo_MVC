@@ -1,0 +1,26 @@
+﻿@model List<AXSeniors_Pedidos_Demo_ENTITY.TipoComprobanteBE>
+
+<div class="container mt-4">
+    <h2>Tipos de Comprobante</h2>
+    <a href="@Url.Action("Agregar")" class="btn btn-primary mb-3">+ Agregar Comprobante</a>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Nombre</td>
+                    <td>
+                        @Html.ActionLink("Editar", "Editar", new { id = item.TipoComprobanteId })
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

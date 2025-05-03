@@ -1,0 +1,32 @@
+﻿@model List<AXSeniors_Pedidos_Demo_ENTITY.ClienteBE>
+
+<div class="container mt-4">
+    <h2>Clientes</h2>
+    <a href="@Url.Action("Agregar")" class="btn btn-primary mb-3">+ Agregar Cliente</a>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Documento</th>
+                <th>Correo</th>
+                <th>Teléfono</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var c in Model)
+            {
+                <tr>
+                    <td>@c.NombreCompleto</td>
+                    <td>@c.NumeroDocumento</td>
+                    <td>@c.Email</td>
+                    <td>@c.Telefono</td>
+                    <td>
+                        @Html.ActionLink("Editar", "Editar", new { id = c.ClienteId })
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

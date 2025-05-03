@@ -1,0 +1,50 @@
+﻿@model List<AXSeniors_Pedidos_Demo_ENTITY.PedidoCabeceraBE>
+
+@{
+    ViewBag.Title = "Lista de Pedidos";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-3">Lista de Pedidos</h2>
+    <a href="@Url.Action("Agregar", "Pedido")" class="btn btn-primary mb-3">+ Agregar Pedido</a>
+
+    <table class="table table-bordered table-striped">
+        <thead class="table-light">
+            <tr>
+                <th>Número</th>
+                <th>Cliente</th>
+                <th>Fecha</th>
+                <th>Subtotal</th>
+                <th>Impuestos</th>
+                <th>Total</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var pedido in Model)
+            {
+            <tr>
+                <td>@pedido.PedidoCabeceraId</td>
+                <td>@pedido.Cliente.Nombre</td>
+                <td>@pedido.FechaPedido.ToShortDateString()</td>
+                @*  Signo $ DOLAR "C"
+                <td>@pedido.Subtotal.ToString("C")</td>
+                <td>@pedido.Impuestos.ToString("C")</td>
+                <td>@pedido.Total.ToString("C")</td>*@
+                <td>@($"S/ {pedido.Subtotal:0.00}")</td>
+                <td>@($"S/ {pedido.Impuestos:0.00}")</td>
+                <td>@($"S/ {pedido.Total:0.00}")</td>
+                <td><span class="badge bg-info text-dark">@pedido.EstadoNombre</span></td>
+                <td>
+                    @Html.ActionLink("Ver", "Details", new { id = pedido.PedidoCabeceraId }) |
+                    @Html.ActionLink("Editar", "Edit", new { id = pedido.PedidoCabeceraId })
+                    @*@Html.ActionLink("Eliminar", "Delete", new { id = pedido.PedidoCabeceraId })*@
+                </td>
+                <td>@pedido.EstadoNombre</td>
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -93,47 +93,6 @@ namespace AXSeniors_Pedidos_Demo_DATA
             }
         }
 
-        public int EliminarCliente(int pClienteId)
-        {
-            try
-            {
-                using (SqlConnection cnx = new SqlConnection(ConnectionDL.Conexion(ConnectionDL.EConexion.PruebaAXSeniorConnection)))
-                {
-                    using (SqlCommand cmd = new SqlCommand("usp_tblcliente_delete", cnx) { CommandType = CommandType.StoredProcedure })
-                    {
-                        cmd.Parameters.Add(new SqlParameter("@pClienteId", SqlDbType.Int)).Value = pClienteId;
-
-                        cnx.Open();
-                        return cmd.ExecuteNonQuery(); // Éxito = 1
-                    }
-                }
-            }
-            catch (SqlException ex)
-            {
-                throw new Exception(ex.Message);
-            }
-        }
-
-        public int EliminarProducto(int pProductoId)
-        {
-            try
-            {
-                using (SqlConnection cnx = new SqlConnection(ConnectionDL.Conexion(ConnectionDL.EConexion.PruebaAXSeniorConnection)))
-                {
-                    using (SqlCommand cmd = new SqlCommand("usp_tblproducto_delete", cnx) { CommandType = CommandType.StoredProcedure })
-                    {
-                        cmd.Parameters.Add(new SqlParameter("@pProductoId", SqlDbType.Int)).Value = pProductoId;
-
-                        cnx.Open();
-                        return cmd.ExecuteNonQuery(); // Devuelve 1 si tuvo éxito
-                    }
-                }
-            }
-            catch (SqlException ex)
-            {
-                throw new Exception(ex.Message);
-            }
-        }
         public int ActualizarTipoComprobante(TipoComprobanteBE pTipoBE)
         {
             try
@@ -144,26 +103,6 @@ namespace AXSeniors_Pedidos_Demo_DATA
                     {
                         cmd.Parameters.AddWithValue("@pTipoComprobanteId", pTipoBE.TipoComprobanteId);
                         cmd.Parameters.AddWithValue("@pNombre", pTipoBE.Nombre);
-                        cnx.Open();
-                        return cmd.ExecuteNonQuery();
-                    }
-                }
-            }
-            catch (SqlException ex)
-            {
-                throw new Exception(ex.Message);
-            }
-        }
-
-        public int EliminarTipoComprobante(int pTipoComprobanteId)
-        {
-            try
-            {
-                using (SqlConnection cnx = new SqlConnection(ConnectionDL.Conexion(ConnectionDL.EConexion.PruebaAXSeniorConnection)))
-                {
-                    using (SqlCommand cmd = new SqlCommand("usp_tbltipocomprobante_delete", cnx) { CommandType = CommandType.StoredProcedure })
-                    {
-                        cmd.Parameters.AddWithValue("@pTipoComprobanteId", pTipoComprobanteId);
                         cnx.Open();
                         return cmd.ExecuteNonQuery();
                     }
@@ -247,6 +186,66 @@ namespace AXSeniors_Pedidos_Demo_DATA
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
                         cmd.Parameters.AddWithValue("@pPedidoDetalleId", detalleId);
+                        cnx.Open();
+                        return cmd.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+        public int EliminarCliente(int pClienteId)
+        {
+            try
+            {
+                using (SqlConnection cnx = new SqlConnection(ConnectionDL.Conexion(ConnectionDL.EConexion.PruebaAXSeniorConnection)))
+                {
+                    using (SqlCommand cmd = new SqlCommand("usp_tblcliente_delete", cnx) { CommandType = CommandType.StoredProcedure })
+                    {
+                        cmd.Parameters.Add(new SqlParameter("@pClienteId", SqlDbType.Int)).Value = pClienteId;
+
+                        cnx.Open();
+                        return cmd.ExecuteNonQuery(); // Éxito = 1
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public int EliminarProducto(int pProductoId)
+        {
+            try
+            {
+                using (SqlConnection cnx = new SqlConnection(ConnectionDL.Conexion(ConnectionDL.EConexion.PruebaAXSeniorConnection)))
+                {
+                    using (SqlCommand cmd = new SqlCommand("usp_tblproducto_delete", cnx) { CommandType = CommandType.StoredProcedure })
+                    {
+                        cmd.Parameters.Add(new SqlParameter("@pProductoId", SqlDbType.Int)).Value = pProductoId;
+
+                        cnx.Open();
+                        return cmd.ExecuteNonQuery(); // Devuelve 1 si tuvo éxito
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+        public int EliminarTipoComprobante(int pTipoComprobanteId)
+        {
+            try
+            {
+                using (SqlConnection cnx = new SqlConnection(ConnectionDL.Conexion(ConnectionDL.EConexion.PruebaAXSeniorConnection)))
+                {
+                    using (SqlCommand cmd = new SqlCommand("usp_tbltipocomprobante_delete", cnx) { CommandType = CommandType.StoredProcedure })
+                    {
+                        cmd.Parameters.AddWithValue("@pTipoComprobanteId", pTipoComprobanteId);
                         cnx.Open();
                         return cmd.ExecuteNonQuery();
                     }

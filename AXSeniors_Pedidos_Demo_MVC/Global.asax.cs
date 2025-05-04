@@ -11,6 +11,7 @@ namespace AXSeniors_Pedidos_Demo_MVC
     {
         protected void Application_Start()
         {
+            UnityConfig.RegisterComponents();
             AreaRegistration.RegisterAllAreas();
             RouteConfig.RegisterRoutes(RouteTable.Routes);
         }

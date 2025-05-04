@@ -8,7 +8,6 @@ namespace AXSeniors_Pedidos_Demo_MVC
 {
     public static class UnityConfig
     {
-        // 🔧 Agrega esta propiedad pública y estática
         public static IUnityContainer Container { get; private set; }
 
         public static void RegisterComponents()

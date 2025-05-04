@@ -23,8 +23,8 @@ namespace AXSeniors_Pedidos_Demo_MVC.Controllers
 
         public ActionResult Index()
         {
-            List<PedidoCabeceraBE> wPedidoCabeceraListBE = _consultaBL.ConsultaPedidoCabecera();
-            return View(wPedidoCabeceraListBE);
+            List<PedidoCabeceraBE> pedidoCabeceraBE = _consultaBL.ConsultaPedidoCabecera();
+            return View(pedidoCabeceraBE);
         }
 
         public ActionResult Agregar()
@@ -38,18 +38,27 @@ namespace AXSeniors_Pedidos_Demo_MVC.Controllers
 
         public ActionResult Details(int id)
         {
-            PedidoCabeceraBE wPedidoCabeceraBE = _consultaBL.ConsultaPedidoDetalle(id);
-            return View(wPedidoCabeceraBE);
+            PedidoCabeceraBE pedidoCabeceraBE = _consultaBL.ConsultaPedidoDetalle(id);
+            return View(pedidoCabeceraBE);
         }
 
         public ActionResult Edit(int id)
         {
-            var wPedido = _consultaBL.ConsultaPedidoDetalle(id);
+            var pedido = _consultaBL.ConsultaPedidoDetalle(id);
             ViewBag.Clientes = _consultaBL.ConsultaCliente();
             ViewBag.Comprobantes = _consultaBL.ConsultaTipoComprobante();
             ViewBag.Estados = _consultaBL.ConsultaEstado();
             ViewBag.Productos = _consultaBL.ConsultaProducto();
-            return View("Editar", wPedido);
+            return View("Editar", pedido);
+        }
+
+        private ActionResult ReenviarVistaConError(int pedidoId, List<ProductoBE> listaProductos)
+        {
+            ViewBag.Clientes = _consultaBL.ConsultaCliente();
+            ViewBag.Comprobantes = _consultaBL.ConsultaTipoComprobante();
+            ViewBag.Productos = listaProductos;
+            ViewBag.Estados = _consultaBL.ConsultaEstado();
+            return View("Editar", _consultaBL.ConsultaPedidoDetalle(pedidoId));
         }
 
         [HttpPost]
@@ -57,40 +66,44 @@ namespace AXSeniors_Pedidos_Demo_MVC.Controllers
         {
             try
             {
-                PedidoCabeceraBE wPedidoCabeceraBE = new PedidoCabeceraBE();
-                List<PedidoDetalleBE> wNuevos = new List<PedidoDetalleBE>();
-                List<PedidoDetalleBE> wEditados = new List<PedidoDetalleBE>();
-                List<PedidoDetalleBE> wEliminados = new List<PedidoDetalleBE>();
+                PedidoCabeceraBE pedidoCabeceraBE = new PedidoCabeceraBE();
+                List<PedidoDetalleBE> nuevosPedidoDetalleBE = new List<PedidoDetalleBE>();
+                List<PedidoDetalleBE> editadosPedidoDetalleBE = new List<PedidoDetalleBE>();
+                List<PedidoDetalleBE> eliminadosDetalleBE = new List<PedidoDetalleBE>();
 
-                wPedidoCabeceraBE.PedidoCabeceraId = Convert.ToInt32(form["PedidoCabeceraId"]);
-                wPedidoCabeceraBE.ClienteId = Convert.ToInt32(form["ClienteId"]);
-                wPedidoCabeceraBE.TipoComprobanteId = Convert.ToInt32(form["TipoComprobanteId"]);
-                wPedidoCabeceraBE.EstadoId = Convert.ToInt32(form["EstadoId"]);
+                pedidoCabeceraBE.PedidoCabeceraId = Convert.ToInt32(form["PedidoCabeceraId"]);
+                pedidoCabeceraBE.ClienteId = Convert.ToInt32(form["ClienteId"]);
+                pedidoCabeceraBE.TipoComprobanteId = Convert.ToInt32(form["TipoComprobanteId"]);
+                pedidoCabeceraBE.EstadoId = Convert.ToInt32(form["EstadoId"]);
 
                 string[] detalleIds = form.GetValues("PedidoDetalleId[]");
                 string[] estados = form.GetValues("Estado[]");
                 string[] productos = form.GetValues("ProductoId[]");
                 string[] cantidades = form.GetValues("CantidadItem[]");
+                string[] cantidadesOriginales = form.GetValues("CantidadItemOriginal[]");
                 string[] precios = form.GetValues("PrecioUnitario[]");
                 string[] descuentos = form.GetValues("DescuentoItem[]");
                 string[] totales = form.GetValues("TotalItem[]");
 
                 decimal wSubtotal = 0;
 
+                var listaProductos = _consultaBL.ConsultaProducto();
+
                 for (int i = 0; i < productos.Length; i++)
                 {
                     var estado = estados[i];
-                    var id = Convert.ToInt32(detalleIds[i]);
+                    var detalleId = Convert.ToInt32(detalleIds[i]);
                     var productoId = Convert.ToInt32(productos[i]);
                     var cantidad = Convert.ToInt32(cantidades[i]);
+                    var cantidadOriginal = Convert.ToInt32(cantidadesOriginales[i]);
 
                     if (estado == "eliminar")
                     {
-                        if (id > 0)
+                        if (detalleId > 0)
                         {
-                            wEliminados.Add(new PedidoDetalleBE
+                            eliminadosDetalleBE.Add(new PedidoDetalleBE
                             {
-                                PedidoDetalleId = id,
+                                PedidoDetalleId = detalleId,
                                 ProductoId = productoId,
                                 CantidadItem = cantidad
                             });
@@ -98,27 +111,33 @@ namespace AXSeniors_Pedidos_Demo_MVC.Controllers
                         continue;
                     }
 
-                    // Validación de stock antes de agregar nuevo producto
-                    if (estado == "nuevo")
+                    var producto = listaProductos.FirstOrDefault(p => p.ProductoId == productoId);
+                    if (producto == null)
                     {
-                        var stockDisponible = _consultaBL.ConsultaProducto()
-                            .FirstOrDefault(p => p.ProductoId == productoId)?.Stock ?? 0;
+                        ModelState.AddModelError("", $"Producto con ID {productoId} no encontrado.");
+                        return ReenviarVistaConError(pedidoCabeceraBE.PedidoCabeceraId, listaProductos);
+                    }
 
-                        if (cantidad > stockDisponible)
+                    if (estado == "nuevo" && cantidad > producto.Stock)
+                    {
+                        ModelState.AddModelError("", $"Stock insuficiente para el producto '{producto.Nombre}'. Disponible: {producto.Stock}, solicitado: {cantidad}.");
+                        return ReenviarVistaConError(pedidoCabeceraBE.PedidoCabeceraId, listaProductos);
+                    }
+
+                    if (estado == "modificar" && cantidad > cantidadOriginal)
+                    {
+                        int diferencia = cantidad - cantidadOriginal;
+                        if (diferencia > producto.Stock)
                         {
-                            ModelState.AddModelError("", $"No hay suficiente stock para el producto ID {productoId}. Stock disponible: {stockDisponible}");
-                            ViewBag.Clientes = _consultaBL.ConsultaCliente();
-                            ViewBag.Comprobantes = _consultaBL.ConsultaTipoComprobante();
-                            ViewBag.Productos = _consultaBL.ConsultaProducto();
-                            ViewBag.Estados = _consultaBL.ConsultaEstado();
-                            return View("Editar", _consultaBL.ConsultaPedidoDetalle(wPedidoCabeceraBE.PedidoCabeceraId));
+                            ModelState.AddModelError("", $"Stock insuficiente para aumentar cantidad del producto '{producto.Nombre}'. Disponible: {producto.Stock}, se requiere: {diferencia}.");
+                            return ReenviarVistaConError(pedidoCabeceraBE.PedidoCabeceraId, listaProductos);
                         }
                     }
 
                     var detalle = new PedidoDetalleBE
                     {
-                        PedidoDetalleId = id,
-                        PedidoCabeceraId = wPedidoCabeceraBE.PedidoCabeceraId,
+                        PedidoDetalleId = detalleId,
+                        PedidoCabeceraId = pedidoCabeceraBE.PedidoCabeceraId,
                         ProductoId = productoId,
                         CantidadItem = cantidad,
                         PrecioUnitario = Convert.ToDecimal(precios[i]),
@@ -129,29 +148,39 @@ namespace AXSeniors_Pedidos_Demo_MVC.Controllers
                     wSubtotal += detalle.TotalItem;
 
                     if (estado == "nuevo")
-                        wNuevos.Add(detalle);
+                    {
+                        nuevosPedidoDetalleBE.Add(detalle);
+                    }
                     else if (estado == "modificar")
-                        wEditados.Add(detalle);
+                    {
+                        editadosPedidoDetalleBE.Add(detalle);
+
+                        if (cantidad != cantidadOriginal)
+                        {
+                            int diferencia = cantidad - cantidadOriginal;
+
+                            if (diferencia > 0)
+                                _updateBL.ActualizarStock(productoId, diferencia, "D");
+                            else
+                                _updateBL.ActualizarStock(productoId, -diferencia, "I");
+                        }
+                    }
                 }
 
-                wPedidoCabeceraBE.Subtotal = wSubtotal;
-                wPedidoCabeceraBE.Impuestos = Math.Round(wSubtotal * 0.18M, 2);
-                wPedidoCabeceraBE.Total = wPedidoCabeceraBE.Subtotal + wPedidoCabeceraBE.Impuestos;
+                pedidoCabeceraBE.Subtotal = wSubtotal;
+                pedidoCabeceraBE.Impuestos = Math.Round(wSubtotal * 0.18M, 2);
+                pedidoCabeceraBE.Total = pedidoCabeceraBE.Subtotal + pedidoCabeceraBE.Impuestos;
 
-                // Actualizar cabecera con totales
-                _updateBL.ActualizarPedidoCabecera(wPedidoCabeceraBE);
+                _updateBL.ActualizarPedidoCabecera(pedidoCabeceraBE);
 
-                // Insertar nuevos
-                _insertBL.InsertarPedidoDetalle(wNuevos);
-                foreach (var item in wNuevos)
+                _insertBL.InsertarPedidoDetalle(nuevosPedidoDetalleBE);
+                foreach (var item in nuevosPedidoDetalleBE)
                     _updateBL.ActualizarStock(item.ProductoId, item.CantidadItem, "D");
 
-                // Actualizar modificados
-                foreach (var item in wEditados)
+                foreach (var item in editadosPedidoDetalleBE)
                     _updateBL.ActualizarPedidoDetalle(item);
 
-                // Eliminar líneas y devolver stock
-                foreach (var item in wEliminados)
+                foreach (var item in eliminadosDetalleBE)
                 {
                     _updateBL.EliminarPedidoDetalle(item.PedidoDetalleId);
                     _updateBL.ActualizarStock(item.ProductoId, item.CantidadItem, "I");
@@ -170,17 +199,19 @@ namespace AXSeniors_Pedidos_Demo_MVC.Controllers
             }
         }
 
+
+
         [HttpPost]
         public ActionResult Agregar(FormCollection form)
         {
             try
             {
-                PedidoCabeceraBE wPedidoCabeceraBE = new PedidoCabeceraBE();
-                List<PedidoDetalleBE> wPedidoDetalleListBE = new List<PedidoDetalleBE>();
+                PedidoCabeceraBE pedidoCabeceraBE = new PedidoCabeceraBE();
+                List<PedidoDetalleBE> pedidoDetalleListBE = new List<PedidoDetalleBE>();
 
-                wPedidoCabeceraBE.ClienteId = Convert.ToInt32(form["ClienteId"]);
-                wPedidoCabeceraBE.TipoComprobanteId = Convert.ToInt32(form["TipoComprobanteId"]);
-                wPedidoCabeceraBE.EstadoId = Convert.ToInt32(form["EstadoId"] ?? "1");
+                pedidoCabeceraBE.ClienteId = Convert.ToInt32(form["ClienteId"]);
+                pedidoCabeceraBE.TipoComprobanteId = Convert.ToInt32(form["TipoComprobanteId"]);
+                pedidoCabeceraBE.EstadoId = Convert.ToInt32(form["EstadoId"] ?? "1");
 
                 // Extraer arrays
                 string[] productos = form.GetValues("ProductoId");
@@ -189,7 +220,7 @@ namespace AXSeniors_Pedidos_Demo_MVC.Controllers
                 string[] descuentos = form.GetValues("DescuentoItem");
                 string[] totales = form.GetValues("TotalItem");
 
-                decimal wSubtotal = 0;
+                decimal subtotal = 0;
 
                 var listaProductos = _consultaBL.ConsultaProducto();
 
@@ -213,7 +244,7 @@ namespace AXSeniors_Pedidos_Demo_MVC.Controllers
                         return View();
                     }
 
-                    PedidoDetalleBE wDetalleBE = new PedidoDetalleBE
+                    PedidoDetalleBE pedidoDetalleBE = new PedidoDetalleBE
                     {
                         ProductoId = productoId,
                         CantidadItem = cantidad,
@@ -222,26 +253,26 @@ namespace AXSeniors_Pedidos_Demo_MVC.Controllers
                         TotalItem = Convert.ToDecimal(totales[i])
                     };
 
-                    wSubtotal += wDetalleBE.TotalItem;
-                    wPedidoDetalleListBE.Add(wDetalleBE);
+                    subtotal += pedidoDetalleBE.TotalItem;
+                    pedidoDetalleListBE.Add(pedidoDetalleBE);
                 }
 
-                wPedidoCabeceraBE.Subtotal = wSubtotal;
-                wPedidoCabeceraBE.Impuestos = Math.Round(wSubtotal * 0.18M, 2);
-                wPedidoCabeceraBE.Total = wPedidoCabeceraBE.Subtotal + wPedidoCabeceraBE.Impuestos;
+                pedidoCabeceraBE.Subtotal = subtotal;
+                pedidoCabeceraBE.Impuestos = Math.Round(subtotal * 0.18M, 2);
+                pedidoCabeceraBE.Total = pedidoCabeceraBE.Subtotal + pedidoCabeceraBE.Impuestos;
 
-                int wPedidoCabeceraId = _insertBL.InsertarPedidoCabecera(wPedidoCabeceraBE);
+                int wPedidoCabeceraId = _insertBL.InsertarPedidoCabecera(pedidoCabeceraBE);
 
-                foreach (var wDetalleBE in wPedidoDetalleListBE)
+                foreach (var detalleList in pedidoDetalleListBE)
                 {
-                    wDetalleBE.PedidoCabeceraId = wPedidoCabeceraId;
+                    detalleList.PedidoCabeceraId = wPedidoCabeceraId;
                 }
 
-                _insertBL.InsertarPedidoDetalle(wPedidoDetalleListBE);
+                _insertBL.InsertarPedidoDetalle(pedidoDetalleListBE);
 
-                foreach (var wDetalleBE in wPedidoDetalleListBE)
+                foreach (var detalleList in pedidoDetalleListBE)
                 {
-                    _updateBL.ActualizarStock(wDetalleBE.ProductoId, wDetalleBE.CantidadItem, "D");
+                    _updateBL.ActualizarStock(detalleList.ProductoId, detalleList.CantidadItem, "D");
                 }
 
                 return RedirectToAction("Index");

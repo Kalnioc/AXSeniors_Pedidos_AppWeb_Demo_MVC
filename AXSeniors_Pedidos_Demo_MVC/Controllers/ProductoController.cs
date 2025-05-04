@@ -40,8 +40,8 @@ namespace AXSeniors_Pedidos_Demo_MVC.Controllers
 
         public ActionResult Editar(int id)
         {
-            var wProducto = _consultaBL.ConsultaProducto().FirstOrDefault(x => x.ProductoId == id);
-            return View(wProducto);
+            var producto = _consultaBL.ConsultaProducto().FirstOrDefault(x => x.ProductoId == id);
+            return View(producto);
         }
 
         [HttpPost]

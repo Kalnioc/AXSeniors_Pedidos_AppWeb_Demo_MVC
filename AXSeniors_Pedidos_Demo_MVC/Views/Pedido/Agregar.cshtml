@@ -72,7 +72,7 @@
             </td>
             <td><input type="number" name="CantidadItem" class="form-control" min="1" value="1" required onchange="actualizarTotal(this)" /></td>
             <td><input type="number" name="PrecioUnitario" class="form-control" step="0.01" required readonly /></td>
-            <td><input type="number" name="DescuentoItem" class="form-control" value="0" min="0" max="100" onchange="actualizarTotal(this)" /></td>
+            <td><input type="number" name="DescuentoItem" class="form-control" value="0" min="0" onchange="actualizarTotal(this)" /></td>
             <td><input type="number" name="TotalItem" class="form-control" readonly /></td>
             <td><button type="button" class="btn btn-danger" onclick="this.closest('tr').remove()">X</button></td>
         `;
@@ -90,9 +90,12 @@
 
     function actualizarTotal(input) {
         const row = input.closest('tr');
-        const cantidad = parseFloat(row.querySelector('[name="CantidadItem"]').value) || 0;
+        const cantidad = Math.max(1, parseFloat(row.querySelector('[name="CantidadItem"]').value) || 1);
         const precio = parseFloat(row.querySelector('[name="PrecioUnitario"]').value) || 0;
-        const descuento = parseFloat(row.querySelector('[name="DescuentoItem"]').value) || 0;
+        const descuento = Math.max(0, parseFloat(row.querySelector('[name="DescuentoItem"]').value) || 0);
+
+        row.querySelector('[name="CantidadItem"]').value = cantidad;
+        row.querySelector('[name="DescuentoItem"]').value = descuento;
 
         const total = cantidad * precio * (1 - descuento / 100);
         row.querySelector('[name="TotalItem"]').value = total.toFixed(2);

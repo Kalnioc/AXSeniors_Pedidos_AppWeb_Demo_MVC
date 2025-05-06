@@ -30,5 +30,5 @@ Este proyecto es una aplicación web ASP.NET MVC C# que permite registrar, modif
 - Registro y edición de clientes, productos, tipos de comprobantes.
 
 
-**Autor:** Diego Rivas Arrué  
+**Autor:** Diego Rivas  
 **Fecha:** Mayo 2025  
